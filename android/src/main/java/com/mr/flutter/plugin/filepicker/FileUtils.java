@@ -20,7 +20,7 @@ import android.webkit.MimeTypeMap;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import com.mr.flutter.plugin.filepicker.utils.CompressFormatUtils;
+import com.mr.flutter.plugin.filepicker.FileInfo;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -102,7 +102,10 @@ public class FileUtils {
             Bitmap originalBitmap = BitmapFactory.decodeStream(imageStream);
             // Compress and save the image
             FileOutputStream fos = new FileOutputStream(compressedFile);
-            originalBitmap.compress(CompressFormatUtils.getFileExtension(MimeTypeMap.getFileExtensionFromUrl(compressedFile.toString())), compressionQuality, fos);
+            Bitmap.CompressFormat compressFormat = getFileExtension(MimeTypeMap.getFileExtensionFromUrl(compressedFile.toString()));
+            if(compressFormat != null){
+                originalBitmap.compress(compressFormat, compressionQuality, fos);
+            }
             fos.flush();
             fos.close();
             compressedUri = Uri.fromFile(compressedFile);
@@ -115,7 +118,19 @@ public class FileUtils {
         }
         return compressedUri;
     }
-
+    public static Bitmap.CompressFormat getFileExtension(String format) {
+        switch (format.toUpperCase()) {
+            case "JPEG" :
+            case "JPG" :
+                return Bitmap.CompressFormat.JPEG;
+            case "PNG":
+                return Bitmap.CompressFormat.PNG;
+            case "WEBP":
+                return Bitmap.CompressFormat.WEBP;
+            default:
+                return null;
+        }
+    }
     private static File createImageFile(Context context) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
