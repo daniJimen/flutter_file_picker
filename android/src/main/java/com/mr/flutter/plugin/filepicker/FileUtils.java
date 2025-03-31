@@ -20,6 +20,8 @@ import android.webkit.MimeTypeMap;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
+import com.mr.flutter.plugin.filepicker.utils.CompressFormatUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
