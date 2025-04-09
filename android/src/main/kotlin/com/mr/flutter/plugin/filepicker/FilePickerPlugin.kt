@@ -13,6 +13,7 @@ import com.mr.flutter.plugin.filepicker.FileUtils.getFileExtension
 import com.mr.flutter.plugin.filepicker.FileUtils.getMimeTypes
 import com.mr.flutter.plugin.filepicker.FileUtils.saveFile
 import com.mr.flutter.plugin.filepicker.FileUtils.startFileExplorer
+import io.flutter.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.FlutterPlugin.FlutterPluginBinding
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -99,21 +100,23 @@ class FilePickerPlugin : MethodCallHandler, FlutterPlugin,
         val result: MethodChannel.Result = MethodResultWrapper(rawResult)
         val arguments = call.arguments as? HashMap<*, *>
         val method = call.method
-
+        io.flutter.Log.d(FilePickerDelegate.TAG, "entro en onMethodCall: ${call.method}")
         when (method) {
             "clear" -> {
                 result.success(activity?.applicationContext?.let { clearCache(it) })
             }
             "save" -> {
+                io.flutter.Log.d(FilePickerDelegate.TAG, "enter in save method:")
                 val type = resolveType(arguments?.get("fileType") as String)
                 val initialDirectory = arguments?.get("initialDirectory") as String?
                 val allowedExtensions = getMimeTypes(arguments?.get("allowedExtensions") as ArrayList<String>?)
                 val bytes = arguments?.get("bytes") as ByteArray?
                 val fileNameWithoutExtension = "${arguments?.get("fileName")}"
-                val fileName = if(fileNameWithoutExtension.isNotEmpty() && !fileNameWithoutExtension.contains(".")) "$fileNameWithoutExtension.${getFileExtension(bytes)}" else fileNameWithoutExtension
-                delegate?.saveFile(fileName, type, initialDirectory, allowedExtensions, bytes, result)
+                io.flutter.Log.d(FilePickerDelegate.TAG, "entro en save y el fileName es : $fileNameWithoutExtension")
+                delegate?.saveFile(fileNameWithoutExtension, type, initialDirectory, allowedExtensions, bytes, result)
             }
             "custom" -> {
+                io.flutter.Log.d(FilePickerDelegate.TAG, "entro en custom method")
                 val allowedExtensions = getMimeTypes(arguments?.get("allowedExtensions") as ArrayList<String>?)
                 if (allowedExtensions.isNullOrEmpty()) {
                     result.error(TAG, "Unsupported filter. Ensure using extension without dot (e.g., jpg, not .jpg).", null)

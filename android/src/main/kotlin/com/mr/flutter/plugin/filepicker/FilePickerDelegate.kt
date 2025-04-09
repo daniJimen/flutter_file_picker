@@ -34,7 +34,10 @@ class FilePickerDelegate @VisibleForTesting internal constructor(
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Boolean {
         return when (requestCode) {
-            SAVE_FILE_CODE -> handleSaveFileResult(resultCode, data)
+            SAVE_FILE_CODE -> {
+                io.flutter.Log.d(FilePickerDelegate.TAG, "entro en el save_file_code en el onactivityresult con esta uri: ${data?.data.toString()}")
+                handleSaveFileResult(resultCode, data)
+            }
             REQUEST_CODE -> handleFilePickerResult(resultCode, data)
             else -> false.also { finishWithError("unknown_activity", "Unknown activity error, please file an issue.") }
         }
@@ -42,9 +45,11 @@ class FilePickerDelegate @VisibleForTesting internal constructor(
 
     private fun handleSaveFileResult(resultCode: Int, data: Intent?): Boolean {
         return when (resultCode) {
-            Activity.RESULT_OK -> saveFile(data?.data)
+            Activity.RESULT_OK -> {
+                io.flutter.Log.d(FilePickerDelegate.TAG, "entro en el save_file_code en el onactivityresult con result ok y esta uri: ${data?.data.toString()}")
+                saveFile(data?.data)}
             Activity.RESULT_CANCELED -> {
-                Log.i(TAG, "User cancelled the save request")
+                io.flutter.Log.i(FilePickerDelegate.TAG, "User cancelled the save request")
                 finishWithSuccess(null)
                 false
             }
@@ -56,26 +61,30 @@ class FilePickerDelegate @VisibleForTesting internal constructor(
         uri ?: return false
         dispatchEventStatus(true)
         val fileName = getFileName(uri, activity)
+        io.flutter.Log.i(FilePickerDelegate.TAG,"entro en el savefile juato antes del try con nombre : $fileName")
         return try {
             val newUri = FileUtils.forceRenameWithCopy(context = activity, uri, "$fileName",bytes)?:uri
+            io.flutter.Log.i(FilePickerDelegate.TAG,"entro en el savefile e hizo el forcerename el archivo se queda con nombre: $fileName")
             finishWithSuccess(newUri.path)
             true
         } catch (e: IOException) {
-            Log.e(TAG, "Error while saving file", e)
+            io.flutter.Log.d(FilePickerDelegate.TAG, "Error while saving file", e)
             finishWithError("Error while saving file", e.message)
             false
         }
     }
 
     private fun handleFilePickerResult(resultCode: Int, data: Intent?): Boolean {
+        io.flutter.Log.i(FilePickerDelegate.TAG, "Result code: $resultCode")
         return when (resultCode) {
             Activity.RESULT_OK -> {
-                dispatchEventStatus(true)
+                io.flutter.Log.i(FilePickerDelegate.TAG, "User pick image correctly with data: ${data?.data}")
                 processFiles(activity, data, compressionQuality, loadDataToMemory, type.orEmpty())
                 true
             }
             Activity.RESULT_CANCELED -> {
-                Log.i(TAG, "User cancelled the picker request")
+                io.flutter.Log.i(FilePickerDelegate.TAG, "User cancelled the picker request confirm")
+                io.flutter.Log.i(FilePickerDelegate.TAG, "User cancelled the picker request")
                 finishWithSuccess(null)
                 true
             }

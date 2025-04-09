@@ -18,7 +18,6 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
-import com.mr.flutter.plugin.filepicker.FilePickerDelegate.Companion
 import com.mr.flutter.plugin.filepicker.FilePickerDelegate.Companion.REQUEST_CODE
 import com.mr.flutter.plugin.filepicker.FilePickerDelegate.Companion.SAVE_FILE_CODE
 import com.mr.flutter.plugin.filepicker.FilePickerDelegate.Companion.finishWithAlreadyActiveError
@@ -38,6 +37,7 @@ import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.plus
 
 object FileUtils {
     private const val TAG = "FilePickerUtils"
@@ -78,6 +78,10 @@ object FileUtils {
                             finishWithError("unknown_path", "Failed to retrieve directory path.")
                         }
                     } else {
+                        io.flutter.Log.d(
+                            FilePickerDelegate.TAG,
+                            "File added"
+                        )
                         addFile(activity, uri, loadDataToMemory, files)
                         handleFileResult(files)
                     }
@@ -132,7 +136,7 @@ object FileUtils {
 
     fun FilePickerDelegate.handleFileResult(files: List<FileInfo>) {
         if (files.isNotEmpty()) {
-            Log.d(FilePickerDelegate.TAG, "File path: $files")
+            io.flutter.Log.d(FilePickerDelegate.TAG, "File path: $files")
             finishWithSuccess(files)
         } else {
             finishWithError("unknown_path", "Failed to retrieve path.")
@@ -160,7 +164,7 @@ object FileUtils {
                 intent.addCategory(Intent.CATEGORY_OPENABLE)
             }
             val uri = (Environment.getExternalStorageDirectory().path + File.separator).toUri()
-            Log.d(FilePickerDelegate.TAG, "Selected type $type")
+            io.flutter.Log.d(FilePickerDelegate.TAG, "Selected type $type")
             intent.setDataAndType(uri, this.type)
             intent.type = this.type
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, this.isMultipleSelection)
@@ -179,7 +183,7 @@ object FileUtils {
         if (intent.resolveActivity(activity.packageManager) != null) {
             activity.startActivityForResult(intent, REQUEST_CODE)
         } else {
-            Log.e(
+            io.flutter.Log.e(
                 FilePickerDelegate.TAG,
                 "Can't find a valid activity to handle the request. Make sure you've a file explorer installed."
             )
@@ -256,7 +260,7 @@ object FileUtils {
         if (intent.resolveActivity(activity.packageManager) != null) {
             activity.startActivityForResult(intent, SAVE_FILE_CODE)
         } else {
-            Log.e(
+            io.flutter.Log.e(
                 FilePickerDelegate.TAG,
                 "Can't find a valid activity to handle the request. Make sure you've a file explorer installed."
             )
@@ -275,7 +279,7 @@ object FileUtils {
     fun addFile(activity: Activity, uri: Uri, loadDataToMemory: Boolean, files: MutableList<FileInfo>) {
         openFileStream(activity, uri, loadDataToMemory)?.let { file ->
             files.add(file)
-            Log.d(FilePickerDelegate.TAG, "[FilePick] URI: ${uri.path}")
+            io.flutter.Log.d(FilePickerDelegate.TAG, "[FilePick] URI: ${uri.path}")
         }
     }
     @Suppress("deprecation")
@@ -309,7 +313,7 @@ object FileUtils {
 
             mimes.add(mime)
         }
-        Log.d(
+        io.flutter.Log.d(
             TAG,
             "Allowed file extensions mimes: $mimes"
         )
@@ -339,7 +343,7 @@ object FileUtils {
                 result = uri.path?.substringAfterLast('/')
             }
         } catch (ex: Exception) {
-            Log.e(
+            io.flutter.Log.e(
                 TAG,
                 "Failed to handle file name: $ex"
             )
@@ -417,7 +421,7 @@ object FileUtils {
             val cacheDir = File(context.cacheDir.toString() + "/file_picker/")
             recursiveDeleteFile(cacheDir)
         } catch (ex: Exception) {
-            Log.e(
+            io.flutter.Log.e(
                 TAG,
                 "There was an error while clearing cached files: $ex"
             )
@@ -436,13 +440,16 @@ object FileUtils {
                 buf.read(bytes, 0, bytes.size)
                 buf.close()
             } catch (e: FileNotFoundException) {
-                Log.e(TAG, "File not found: " + e.message, null)
+                io.flutter.Log.e(FilePickerDelegate.TAG, "File not found: " + e.message)
             } catch (e: IOException) {
-                Log.e(TAG, "Failed to close file streams: " + e.message, null)
+                io.flutter.Log.e(
+                    FilePickerDelegate.TAG,
+                    "Failed to close file streams: " + e.message
+                )
             }
             fileInfo.withData(bytes)
         } catch (e: Exception) {
-            Log.e(
+            io.flutter.Log.e(
                 TAG,
                 "Failed to load bytes into memory with error $e. Probably the file is too big to fit device memory. Bytes won't be added to the file this time."
             )
@@ -451,7 +458,7 @@ object FileUtils {
 
     @JvmStatic
     fun openFileStream(context: Context, uri: Uri, withData: Boolean): FileInfo? {
-        Log.i(TAG, "Caching from URI: $uri")
+        io.flutter.Log.i(FilePickerDelegate.TAG, "Caching from URI: $uri")
         var `in`: InputStream? = null
         var fos: FileOutputStream? = null
         val fileInfo = FileInfo.Builder()
@@ -477,7 +484,11 @@ object FileUtils {
                 }
                 out.flush()
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to retrieve and cache file: " + e.message, e)
+                io.flutter.Log.e(
+                    FilePickerDelegate.TAG,
+                    "Failed to retrieve and cache file: " + e.message,
+                    e
+                )
                 return null
             } finally {
                 try {
@@ -485,12 +496,16 @@ object FileUtils {
                     fos?.close()
                     `in`?.close()
                 } catch (ex: IOException) {
-                    Log.e(TAG, "Failed to close file streams: " + ex.message, ex)
+                    io.flutter.Log.e(
+                        FilePickerDelegate.TAG,
+                        "Failed to close file streams: " + ex.message,
+                        ex
+                    )
                 }
             }
         }
 
-        Log.d(TAG, "File loaded and cached at: $path")
+        io.flutter.Log.d(FilePickerDelegate.TAG, "File loaded and cached at: $path")
 
         if (withData) {
             loadData(file, fileInfo)
