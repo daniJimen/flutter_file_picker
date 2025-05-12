@@ -67,7 +67,7 @@ object FileUtils {
                 }
 
                 data.data != null -> {
-                    var uri = processUri(activity, data.data!!, compressionQuality)
+                    var uri = data.data?.let { processUri(activity, it, compressionQuality) }
 
                     if (type == "dir") {
                         uri = DocumentsContract.buildDocumentUriUsingTree(
@@ -81,7 +81,7 @@ object FileUtils {
                             finishWithError("unknown_path", "Failed to retrieve directory path.")
                         }
                     } else {
-                        addFile(activity, uri, loadDataToMemory, files)
+                        uri?.let { addFile(activity, it, loadDataToMemory, files) }
                         handleFileResult(files)
                     }
                 }
