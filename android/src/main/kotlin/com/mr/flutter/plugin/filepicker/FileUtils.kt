@@ -511,7 +511,21 @@ object FileUtils {
     private fun getPathFromTreeUri(uri: Uri): String {
         val docId = DocumentsContract.getTreeDocumentId(uri)
         val parts = docId.split(":")
-        return "${Environment.getExternalStorageDirectory()}/${parts.last()}"
+
+        // Check if the URI corresponds to external storage
+        return if (parts.size > 1) {
+            val volumeId = parts[0]
+            val path = parts[1]
+
+            // Map volume ID to external storage path
+            if ("primary".equals(volumeId, ignoreCase = true)) {
+                "${Environment.getExternalStorageDirectory()}/$path"
+            } else {
+                "/storage/$volumeId/$path"
+            }
+        } else {
+            "${Environment.getExternalStorageDirectory()}/${parts.last()}"
+        }
     }
 
     private fun isGooglePhotosUri(uri: Uri): Boolean {
