@@ -1,6 +1,6 @@
 ## 10.3.3
 ### Android
-- Update android compile sdk to 36 and update gradle to version 8+
+- Update android compile sdk to 36 and update gradle to version 8+ [#1882](https://github.com/miguelpruivo/flutter_file_picker/pull/1882) [@aniJimen](https://github.com/daniJimen) [@amorenew](https://github.com/amorenew)
 
 ## 10.3.2
 ### Linux
