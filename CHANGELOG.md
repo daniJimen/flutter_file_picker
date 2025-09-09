@@ -1,3 +1,7 @@
+## 10.3.3
+### Android
+- Update android compile sdk to 36 and update gradle to version 8+ [#1882](https://github.com/miguelpruivo/flutter_file_picker/pull/1882) [@aniJimen](https://github.com/daniJimen) [@amorenew](https://github.com/amorenew)
+
 ## 10.3.2
 ### Linux
 - Fixed an issue filtering files by extension on Linux. [#1870](https://github.com/miguelpruivo/flutter_file_picker/pull/1870) [@Decodetalkers](https://github.com/Decodetalkers)
