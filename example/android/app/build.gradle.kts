@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.mr.flutter.plugin.filepicker.file_picker_example"
     compileSdk = 36
-    ndkVersion = 26.1.10909125
+    ndkVersion = "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
