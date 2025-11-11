@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.4.2'
+        classpath 'com.android.tools.build:gradle:8.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -27,7 +27,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
-    compileSdk flutter.compileSdkVersion
+    compileSdk 36
 
     defaultConfig {
         minSdk 21
@@ -36,6 +36,11 @@ android {
     }
     lintOptions {
         disable 'InvalidPackage'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     
     dependencies {
