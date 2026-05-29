@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:js_interop';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:file_picker/src/api/file_picker_types.dart';
@@ -14,11 +15,18 @@ import 'package:web/web.dart';
 class FilePickerWeb extends FilePickerPlatform {
   late Element _target;
   final String _kFilePickerInputsDomId = '__file_picker_web-file-input';
+  final double _kDialogAnchorInset = 8;
+  final double _kDialogAnchorSize = 1;
 
   final int _readStreamChunkSize = 1000 * 1000; // 1 MB
 
+  Element? _lastInteractionTarget;
+  double? _lastInteractionClientX;
+  double? _lastInteractionClientY;
+
   FilePickerWeb._() {
     _target = _ensureInitialized(_kFilePickerInputsDomId);
+    _registerAnchorTracking();
   }
 
   static void registerWith(Registrar registrar) {
@@ -37,6 +45,157 @@ class FilePickerWeb extends FilePickerPlatform {
       target = targetElement;
     }
     return target;
+  }
+
+  void _registerAnchorTracking() {
+    document.addEventListener('focusin', _cacheFocusedElement.toJS);
+    document.addEventListener('pointerdown', _cachePointerAnchor.toJS);
+    document.addEventListener('mousedown', _cacheMouseAnchor.toJS);
+    document.addEventListener('touchstart', _cacheTouchAnchor.toJS);
+  }
+
+  void _cacheFocusedElement(Event event) {
+    _cacheAnchorTarget(event.target);
+  }
+
+  void _cachePointerAnchor(Event event) {
+    final PointerEvent pointerEvent = event as PointerEvent;
+    _cacheAnchorTarget(pointerEvent.target);
+    _lastInteractionClientX = pointerEvent.clientX.toDouble();
+    _lastInteractionClientY = pointerEvent.clientY.toDouble();
+  }
+
+  void _cacheMouseAnchor(Event event) {
+    final MouseEvent mouseEvent = event as MouseEvent;
+    _cacheAnchorTarget(mouseEvent.target);
+    _lastInteractionClientX = mouseEvent.clientX.toDouble();
+    _lastInteractionClientY = mouseEvent.clientY.toDouble();
+  }
+
+  void _cacheTouchAnchor(Event event) {
+    final TouchEvent touchEvent = event as TouchEvent;
+    _cacheAnchorTarget(touchEvent.target);
+
+    final TouchList touches = touchEvent.changedTouches.length > 0
+        ? touchEvent.changedTouches
+        : touchEvent.touches;
+    final Touch? touch = touches.item(0);
+    if (touch == null) {
+      return;
+    }
+
+    _lastInteractionClientX = touch.clientX;
+    _lastInteractionClientY = touch.clientY;
+  }
+
+  void _cacheAnchorTarget(EventTarget? target) {
+    if (target == null || !target.isA<Element>()) {
+      return;
+    }
+
+    final Element element = target as Element;
+    if (element == _target || element.id == _kFilePickerInputsDomId) {
+      return;
+    }
+
+    _lastInteractionTarget = element;
+  }
+
+  void _clearTargetChildren() {
+    Node? firstChild = _target.firstChild;
+    while (firstChild != null) {
+      _target.removeChild(firstChild);
+      firstChild = _target.firstChild;
+    }
+  }
+
+  void _positionUploadInput(HTMLInputElement uploadInput) {
+    final Element? anchorElement = _resolveAnchorElement();
+    final DOMRect? anchorRect = anchorElement?.getBoundingClientRect();
+
+    double left = _lastInteractionClientX ?? 0;
+    double top = _lastInteractionClientY ?? 0;
+
+    if (anchorRect != null) {
+      final double anchorWidth = math.max(anchorRect.width, 0);
+      final double anchorHeight = math.max(anchorRect.height, 0);
+
+      left = anchorRect.left + math.min(_kDialogAnchorInset, anchorWidth / 2);
+      top = anchorRect.top + math.min(_kDialogAnchorInset, anchorHeight / 2);
+    }
+
+    final double maxLeft = math.max(
+      window.innerWidth.toDouble() - _kDialogAnchorSize,
+      0,
+    );
+    final double maxTop = math.max(
+      window.innerHeight.toDouble() - _kDialogAnchorSize,
+      0,
+    );
+
+    left = left.clamp(0, maxLeft).toDouble();
+    top = top.clamp(0, maxTop).toDouble();
+
+    uploadInput.style
+      ..position = 'fixed'
+      ..left = '${left}px'
+      ..top = '${top}px'
+      ..width = '${_kDialogAnchorSize}px'
+      ..height = '${_kDialogAnchorSize}px'
+      ..margin = '0'
+      ..padding = '0'
+      ..border = '0'
+      ..opacity = '0.0001'
+      ..overflow = 'hidden'
+      ..zIndex = '2147483647';
+  }
+
+  Element? _resolveAnchorElement() {
+    final Element? activeElement = document.activeElement;
+    if (_isUsableAnchorElement(activeElement)) {
+      return activeElement;
+    }
+
+    if (_isUsableAnchorElement(_lastInteractionTarget)) {
+      return _lastInteractionTarget;
+    }
+
+    return null;
+  }
+
+  bool _isUsableAnchorElement(Element? element) {
+    if (element == null ||
+        element == _target ||
+        element.id == _kFilePickerInputsDomId) {
+      return false;
+    }
+
+    final String tagName = element.tagName.toLowerCase();
+    if (tagName == 'body' || tagName == 'html') {
+      return false;
+    }
+
+    final DOMRect rect = element.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return false;
+    }
+
+    final double viewportWidth = window.innerWidth.toDouble();
+    final double viewportHeight = window.innerHeight.toDouble();
+    final bool coversMostOfViewport =
+        rect.width >= viewportWidth * 0.9 &&
+        rect.height >= viewportHeight * 0.9;
+
+    return !coversMostOfViewport;
+  }
+
+  void _showUploadPicker(HTMLInputElement uploadInput) {
+    try {
+      uploadInput.showPicker();
+      return;
+    } catch (_) {
+      uploadInput.click();
+    }
   }
 
   @override
@@ -80,7 +239,6 @@ class FilePickerWeb extends FilePickerPlatform {
     uploadInput.draggable = true;
     uploadInput.multiple = allowMultiple;
     uploadInput.accept = accept;
-    uploadInput.style.display = 'none';
 
     bool changeEventTriggered = false;
 
@@ -193,22 +351,22 @@ class FilePickerWeb extends FilePickerPlatform {
       window.addEventListener('focus', cancelledEventListener.toJS);
     }
 
-    //Add input element to the page body
-    Node? firstChild = _target.firstChild;
-    while (firstChild != null) {
-      _target.removeChild(firstChild);
-      firstChild = _target.firstChild;
-    }
+    // Keep the input in the DOM until the native picker closes so browsers
+    // like Safari on iOS can anchor the dialog to the tapped control.
+    _clearTargetChildren();
+    _positionUploadInput(uploadInput);
     _target.children.add(uploadInput);
-    uploadInput.click();
+    final Future<List<PlatformFile>?> pendingFiles = filesCompleter.future
+        .whenComplete(_clearTargetChildren);
 
-    firstChild = _target.firstChild;
-    while (firstChild != null) {
-      _target.removeChild(firstChild);
-      firstChild = _target.firstChild;
+    try {
+      _showUploadPicker(uploadInput);
+    } catch (_) {
+      _clearTargetChildren();
+      rethrow;
     }
 
-    final List<PlatformFile>? files = await filesCompleter.future;
+    final List<PlatformFile>? files = await pendingFiles;
     filesCompleter = null;
 
     return files == null ? null : FilePickerResult(files);
