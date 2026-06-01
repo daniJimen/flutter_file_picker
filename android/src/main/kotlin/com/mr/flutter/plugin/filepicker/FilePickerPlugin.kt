@@ -164,7 +164,7 @@ class FilePickerPlugin : MethodCallHandler, FlutterPlugin,
 
             "custom" -> {
                 val allowedExtensions =
-                    getMimeTypes(arguments?.get("allowedExtensions") as ArrayList<String>?)
+                    getMimeTypes(arguments?.get("allowedExtensions") as? ArrayList<String>?)
                 val androidSafOptions = arguments?.get("androidSafOptions") as? java.util.HashMap<*, *>
                 delegate?.startFileExplorer(
                     resolveType(method),
