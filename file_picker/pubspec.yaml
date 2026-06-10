@@ -56,3 +56,6 @@ flutter:
         dartPluginClass: FilePickerWindows
       linux:
         default_package: file_picker_linux
+dependency_overrides:
+  ffi_leak_tracker:
+    path: ../ffi_leak_tracker_stub
