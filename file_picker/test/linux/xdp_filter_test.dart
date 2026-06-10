@@ -1,7 +1,7 @@
 @TestOn('linux')
 library;
 
-import 'package:file_picker/src/linux/filters.dart';
+import 'package:file_picker_linux/src/linux/filters.dart';
 import 'package:file_picker_platform_interface/file_picker_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:file_picker_platform_interface/file_picker.dart';
 import 'package:file_picker_platform_interface/file_picker_platform_interface.dart';
-import 'package:file_picker/src/linux/xdp_filechooser.dart';
-import 'package:file_picker/src/linux/xdp_request.dart';
-import 'package:file_picker/src/linux/filters.dart';
+import 'package:file_picker_linux/src/linux/filters.dart';
+import 'package:file_picker_linux/src/linux/xdp_filechooser.dart';
+import 'package:file_picker_linux/src/linux/xdp_request.dart';
 import 'package:dbus/dbus.dart';
 
 class FilePickerLinux extends FilePickerPlatform {
