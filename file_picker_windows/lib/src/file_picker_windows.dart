@@ -6,8 +6,9 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
+import 'package:file_picker_platform_interface/file_picker.dart';
 import 'package:file_picker_platform_interface/file_picker_platform_interface.dart';
-import 'package:file_picker/src/windows/file_picker_windows_ffi_types.dart';
+import 'package:file_picker_windows/src/windows/file_picker_windows_ffi_types.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:win32/win32.dart';
