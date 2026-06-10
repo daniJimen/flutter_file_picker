@@ -50,8 +50,6 @@ flutter:
         pluginClass: FilePickerPlugin
         sharedDarwinSource: true
         dartPluginClass: FilePickerMacOS
-      windows:
-        dartPluginClass: FilePickerWindows
       linux:
         default_package: file_picker_linux
 dependency_overrides:
