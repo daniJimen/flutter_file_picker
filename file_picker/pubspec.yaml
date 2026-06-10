@@ -22,6 +22,8 @@ dependencies:
   dbus: ^0.7.12
   file_picker_platform_interface:
     path: ../file_picker_platform_interface
+  file_picker_apple:
+    path: ../file_picker_apple
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -42,15 +44,12 @@ flutter:
         package: com.mr.flutter.plugin.filepicker
         pluginClass: FilePickerPlugin
       ios:
-        pluginClass: FilePickerPlugin
-        sharedDarwinSource: true
+        default_package: file_picker_apple
       web:
         pluginClass: FilePickerWeb
         fileName: src/file_picker_web.dart
       macos:
-        pluginClass: FilePickerPlugin
-        sharedDarwinSource: true
-        dartPluginClass: FilePickerMacOS
+        default_package: file_picker_apple
       windows:
         dartPluginClass: FilePickerWindows
       linux:

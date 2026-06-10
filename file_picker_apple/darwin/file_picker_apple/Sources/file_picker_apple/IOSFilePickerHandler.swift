@@ -337,9 +337,9 @@ final class IOSFilePickerHandler: NSObject,
 
         do {
             if FileManager.default.fileExists(atPath: destinationURL.path) {
-                try FileManager.default.removeItem(at: destinationURL)
+                try fileManager.removeItem(at: destinationURL)
             }
-            try FileManager.default.copyItem(at: sourceURL, to: destinationURL)
+            try fileManager.copyItem(at: sourceURL, to: destinationURL)
             return destinationURL
         } catch {
             return nil
@@ -359,15 +359,15 @@ final class IOSFilePickerHandler: NSObject,
                 "size": size,
             ]
 
-            if let data {
-                fileInfo["bytes"] = FlutterStandardTypedData(bytes: data)
-            }
-
-            return fileInfo
-        } catch {
-            return nil
+        if let data {
+            fileInfo["bytes"] = FlutterStandardTypedData(bytes: data)
         }
+
+        return fileInfo
+    } catch {
+        return nil
     }
+}
 
     private func finishCurrentRequest(_ value: Any?) {
         guard let currentResult = result else {

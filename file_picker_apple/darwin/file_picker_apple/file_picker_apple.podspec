@@ -1,9 +1,6 @@
-#
-# To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint file_picker.podspec` to validate before publishing.
-#
+# Copied podspec for shared Darwin sources
 Pod::Spec.new do |s|
-  s.name             = 'file_picker'
+  s.name             = 'file_picker_apple'
   s.version          = '0.0.1'
   s.summary          = 'A flutter plugin to show native file picker dialogs'
   s.description      = <<-DESC
@@ -13,10 +10,13 @@ A flutter plugin to show native file picker dialogs
   s.license          = { :file => '../LICENSE' }
   s.author           = 'Miguel Ruivo, Dominik Roszkowski'
   s.source           = { :path => '.' }
-  s.source_files     = 'file_picker/Sources/**/*.swift'
 
   s.resource_bundles = {
-    'file_picker_privacy' => ['file_picker/Sources/file_picker/PrivacyInfo.xcprivacy']
+  s.source_files     = 'file_picker_apple/Sources/**/*.swift'
+
+  s.resource_bundles = {
+    'file_picker_apple_privacy' => ['file_picker_apple/Sources/file_picker_apple/PrivacyInfo.xcprivacy']
+  }
   }
 
   s.ios.dependency 'Flutter'
