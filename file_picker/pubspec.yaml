@@ -9,8 +9,6 @@ publish_to: 'none'
 dependencies:
   flutter:
     sdk: flutter
-  flutter_web_plugins:
-    sdk: flutter
 
   flutter_plugin_android_lifecycle: ^2.0.34
   plugin_platform_interface: ^2.1.8
@@ -22,6 +20,8 @@ dependencies:
   dbus: ^0.7.12
   file_picker_platform_interface:
     path: ../file_picker_platform_interface
+  file_picker_web:
+    path: ../file_picker_web
 
 dev_dependencies:
   flutter_lints: ^5.0.0
@@ -45,8 +45,7 @@ flutter:
         pluginClass: FilePickerPlugin
         sharedDarwinSource: true
       web:
-        pluginClass: FilePickerWeb
-        fileName: src/file_picker_web.dart
+        default_package: file_picker_web
       macos:
         pluginClass: FilePickerPlugin
         sharedDarwinSource: true
