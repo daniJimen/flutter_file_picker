@@ -48,8 +48,6 @@ flutter:
         fileName: src/file_picker_web.dart
       macos:
         default_package: file_picker_apple
-      windows:
-        dartPluginClass: FilePickerWindows
       linux:
         dartPluginClass: FilePickerLinux
 dependency_overrides:
