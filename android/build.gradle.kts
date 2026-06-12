@@ -14,7 +14,6 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:8.5.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22")
     }
 }
 
@@ -37,15 +36,8 @@ fun GroovyObject.intProperty(name: String): Int {
 val agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
     .substringBefore('.')
     .toInt()
-val builtInKotlinProperty = providers.gradleProperty("android.builtInKotlin").orNull
-val isBuiltInKotlinEnabled = agpVersion >= 9 &&
-    (builtInKotlinProperty == null || builtInKotlinProperty.toBoolean())
-val shouldApplyKotlinAndroidPlugin = agpVersion < 9 || !isBuiltInKotlinEnabled
 
 apply(plugin = "com.android.library")
-if (shouldApplyKotlinAndroidPlugin) {
-    apply(plugin = "org.jetbrains.kotlin.android")
-}
 
 val flutterExtension = extensions.getByName("flutter") as GroovyObject
 val flutterCompileSdkVersion = flutterExtension.intProperty("compileSdkVersion")
@@ -69,13 +61,6 @@ configure<LibraryExtension> {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    if (shouldApplyKotlinAndroidPlugin) {
-        withGroovyBuilder {
-            "kotlinOptions" {
-                setProperty("jvmTarget", JavaVersion.VERSION_17.toString())
-            }
-        }
-    }
 }
 
 dependencies {
